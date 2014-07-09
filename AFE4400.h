@@ -96,7 +96,10 @@ SOFTWARE.
 class AFE4400
 {
 public:
-	int slaveSelectPin;
+	int chipSelectPin;
+	int nAFE_pwdn;
+	int AFE_ADC_rdy;
+	int nAFE_rst;
 	bool debugSerial;
 
 	int pulse;

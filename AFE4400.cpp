@@ -35,6 +35,10 @@ SOFTWARE.
 
 AFE4400::AFE4400() {
   debugSerial = 0;
+  
+  nAFE_pwdn = 3;
+  AFE_ADC_rdy = 2;
+  nAFE_rst = 4;
 }
 
 void AFE4400::sw_reset() {
@@ -53,8 +57,19 @@ void AFE4400::sw_reset() {
 //  Initial SPI setup, soft reset of device
 //
 void AFE4400::begin(int ss) {
-  slaveSelectPin = ss;
-  pinMode(slaveSelectPin, OUTPUT);
+  chipSelectPin = ss;
+  
+  // set up control pins
+  pinMode(nAFE_pwdn, OUTPUT);
+  pinMode(AFE_ADC_rdy, OUTPUT);
+  pinMode(nAFE_rst, OUTPUT);
+  pinMode(chipSelectPin, OUTPUT);
+  
+  // enable control pins
+  digitalWrite(nAFE_pwdn, HIGH);
+  digitalWrite(nAFE_rst, HIGH);
+  
+  // set up SPI
   SPI.begin();
   SPI.setDataMode(SPI_MODE0);	//CPHA = CPOL = 0    MODE = 0
   delay(1000);
@@ -188,7 +203,7 @@ uint32_t AFE4400::SPIReadReg(byte regAddress){
   // enable reading from registers
   SPIEnableRead();
   
-  digitalWrite(slaveSelectPin, LOW);
+  digitalWrite(chipSelectPin, LOW);
   
   // set address
   SPI.transfer(regAddress);
@@ -201,7 +216,7 @@ uint32_t AFE4400::SPIReadReg(byte regAddress){
   // get last byte
   temp_byte = SPI.transfer(0x00);
   
-  digitalWrite(slaveSelectPin, HIGH);
+  digitalWrite(chipSelectPin, HIGH);
   
   // disable reading from registers
   SPIDisableRead();
@@ -222,7 +237,7 @@ void AFE4400::SPIDisableRead() {
 void AFE4400::SPIWriteReg(byte regAddress, uint32_t regValue){
   byte temp_byte = 0;
   
-  digitalWrite(slaveSelectPin, LOW);
+  digitalWrite(chipSelectPin, LOW);
   
   SPI.transfer(regAddress);  // write instruction
   temp_byte = regValue >> 16;
@@ -232,7 +247,7 @@ void AFE4400::SPIWriteReg(byte regAddress, uint32_t regValue){
   temp_byte = regValue;
   SPI.transfer(regValue);
   
-  digitalWrite(slaveSelectPin, HIGH);
+  digitalWrite(chipSelectPin, HIGH);
 }
 
 void AFE4400::writeTimingData(byte regAddress, uint16_t timing_value) {

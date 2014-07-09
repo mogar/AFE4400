@@ -8,9 +8,9 @@ Example Code for use with AFE4400 library
 Pin Connections:
 Arduino    <----->  AFE4400
 SS   (10)
-MOSI   ()
-MISO   ()
-CLK    ()
+MOSI (11)
+MISO (12)
+CLK  (13)
 GND
 5V 
  
